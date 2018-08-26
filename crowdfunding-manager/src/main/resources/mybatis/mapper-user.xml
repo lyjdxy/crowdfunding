@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crazy.crowdfunding.dao.UserDao">
+	<select id="pageQuery" resultType="com.crazy.crowdfunding.bean.User">
+		select
+		*
+		from t_user
+		<where>
+			<if test="queryText != null">
+				and account like concat('%', #{queryText}, '%')
+				<!-- 如果直接写 '%#queryText%' 会先变成'%?%',而当外边存在单引号时，问号不会起占位符作用，而是直接是单纯的符号? -->
+			</if>
+		</where>
+		order by create_time desc
+		limit #{start},#{size}
+	</select>
+
+	<select id="pageQueryTotal" resultType="int">
+		select count(*) from
+		t_user
+		<where>
+			<if test="queryText != null">
+				and account like concat('%', #{queryText}, '%')
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertUser">
+		insert into t_user
+		(account, name,password, email,create_time) 
+		values
+		(#{account},#{name},#{password},#{email},#{createTime})	
+	</insert>
+	
+	<update id="updateUser">
+		update t_user
+		set account = #{account},name = #{name} ,email=#{email}
+		where id=#{id} 
+	</update>
+	
+	<delete id="deleteById">
+		delete from t_user
+		where id = #{id}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user where id in
+		<foreach collection="userids" item="userid" open="(" close=")" separator=",">
+			#{userid}
+		</foreach>
+	</delete>
+	
+	<insert id="insertUserRoles">
+		insert into t_UR(u_id, r_id)
+		values
+		<foreach collection="roleids" item="roleid" separator=",">
+			(#{userid},#{roleid})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteAssignroleids">
+		delete from t_UR where u_id = #{userid} and r_id in
+		<foreach collection="roleids" item="roleid" open="(" close=")" separator=",">
+			#{roleid}
+		</foreach>
+	</delete>
+</mapper>

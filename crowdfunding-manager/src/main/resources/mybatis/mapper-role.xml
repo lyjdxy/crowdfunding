@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crazy.crowdfunding.dao.RoleDao">
+	
+	<select id="queryLimit" resultType="com.crazy.crowdfunding.bean.Role">
+		select * from t_role 
+		<where>
+			<if test="likeSel != null">
+				and role_name like concat('%', #{likeSel}, '%')
+			</if>
+		</where>
+		limit #{start},#{size}
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(id) from t_role
+		<where>
+			<if test="likeSel != null">
+				and role_name like concat('%', #{likeSel}, '%')
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insert">
+		insert into t_role(role_name) values(#{roleName})
+	</insert>
+	
+	<update id="update">
+		update t_role 
+		set role_name = #{roleName}
+		where id = #{id}
+	</update>
+	
+	<insert id="insertRolePermission">
+        insert into t_role_permission (roleid, permissionid) values 
+        <foreach collection="permissionids" item="permissionid" separator=",">
+        ( #{roleid}, #{permissionid} )
+        </foreach>
+    </insert>
+    
+    <delete id="deleteRolePermissions">
+        delete from t_role_permission where roleid = #{roleid}
+    </delete>
+	
+</mapper>
